@@ -1,204 +1,161 @@
 #!/usr/bin/env python3
-import argparse
-from colorama import Fore, Back, Style
-from readchar import readkey
+import sys
 import random
 import string
+import colorama
 import time
 from collections import namedtuple
+from datetime import datetime
+from pprint import pprint
+from readchar import readchar, key
 
-Inputs = namedtuple('Input', ['requested', 'received','duration'])
-init = time.time()
-my_dict = {}
 
-# Point 2: receives input arguments that will define the game mode
-def initValues():
-    
-    parser = argparse.ArgumentParser(description = 'Definition of test mode.')
-    parser.add_argument('-utm', '--use_time_mode', type=int,
-                    help="Max number of secs for time mode or maximum number of inputs for number of inputs mode.")
-    parser.add_argument('-mv', '--max_value', type=int,
-                    help="Max number of secs for time mode or maximum number of inputs for number of inputs mode.")
+Input = namedtuple('Input', ['requested', 'received', 'duration'])
+input_list = []
 
-    args = vars(parser.parse_args())
-    # assings a variable to the corresponding input values
-    maxv = args["max_value"]
-    temp = args["use_time_mode"]
+dict = {
+    'accuracy': 0,
+    'inputs': [],
+    'number_of_hits': 0,
+    'number_of_types': 0,
+    'test_duration': 0,
+    'test_end': '',
+    'test_start': '',
+    'type_average_duration': 0,
+    'type_hit_average_duration': 0,
+    'type_miss_average_duration': 0
+}
 
-    # defines game mode
-    if maxv == None:
-        print("User Time Mode: you have " + str(temp) + " seconds!")
-        return{"use_time" : temp}
+def main(): 
+    if sys.argv[1] == "-mv":
+        mvmode(sys.argv[2])
+        pprint(dict)
+    elif sys.argv[1] == "-utm":
+        utmode(sys.argv[2])
+        pprint(dict)
+    elif sys.argv[1] == "-h":
+        helpmsg()
+         
     else:
-        print(Fore.BLUE + "Maximum Input Mode: you have " + str(maxv) + " chances" + Style.RESET_ALL)
-        return{"maximum_input" : maxv}
+        print("Invalid input")
+
+def mvmode(max_number):
+    n_correct = 0
+    n_wrong = 0
+    time_correct = 0
+    time_wrong = 0
+    dict['test_start'] = time.asctime()
+    for i in range(0,int(max_number)):
+        start_time = time.time()
+        n = random.choice(string.ascii_lowercase)
+        print("Type letter " + colorama.Fore.BLUE + str(n)+ colorama.Style.RESET_ALL)
+        input_char = readchar()
+        if input_char == key.SPACE:
+            break
+        if n == input_char :
+            print("You typed letter "+ colorama.Fore.GREEN + input_char+colorama.Style.RESET_ALL)
+            n_correct += 1
+            time_correct += time.time() - start_time
+        else :
+            print("You typed letter "+ colorama.Fore.RED + input_char+colorama.Style.RESET_ALL)
+            n_wrong += 1
+            time_wrong += time.time() - start_time
+
+        input_list.append(Input(n, input_char, time.time() - start_time))
 
 
-# Point 3: ask to press a letter to start
-def startGame():
-    print(Fore.YELLOW + "Press any key to start the game:" + Style.RESET_ALL)
-    initialize = readkey()
-    if initialize != None:
-        return True
+    dict['inputs'] = input_list
+    if n_correct != 0 or n_wrong != 0:
+        dict['accurary'] = n_correct / (n_correct + n_wrong)
+    else:
+        dict['accurary'] = 0
+    dict['number_of_hits'] = n_correct
+    dict['number_of_types'] = n_correct + n_wrong
+    dict['test_end'] = time.asctime()
+    if len(dict['inputs']) > 0:
+        dict['test_duration'] = sum([x.duration for x in dict['inputs']])
+        dict['type_average_duration'] = sum([x.duration for x in dict['inputs']]) / len(dict['inputs'])
+    else:
+        dict['type_average_duration'] = 0
+        dict['test_duration'] = 0
+    # if statmet to avoid division by zero
+    if n_correct != 0:
+        dict['type_hit_average_duration'] = time_correct / n_correct
+    else :
+        dict['type_hit_average_duration'] = 0
+    if n_wrong != 0:
+        dict['type_miss_average_duration'] = time_wrong / n_wrong
+    else:        
+        dict['type_miss_average_duration'] = 0
 
 
-# Point 4: show a random lowercase letter and receive answer
-def askLetter():
-    asked_letter = random.choice(string.ascii_letters).lower()
-    print("Press " + asked_letter)
-    return asked_letter
-def answLetter():
-    inserted_letter = readkey()
-    return inserted_letter
 
 
-# Point 5: distinct game modes
-def modeSelection():
-
-    input = initValues()
-    mode = list(input.keys())[0]
-
-    return mode
-
-# Point 5.1: User Time Mode
-def gameTime(t):
-    types = []
-    type_average_duration = []
-    type_hit_average_duration = []
-    type_miss_average_duration = []
-    
-    number_of_types = 0
-    number_of_hits = 0
-
-    time_init = time.time()
-    delta = 0
-
-    while delta < t:
-        time_request = time.time()
-        requested = askLetter()
-        received = answLetter()
-
-        if requested == received:
-            time_hit_answ = time.time()
-            print(Fore.GREEN + "You typed " + received + Style.RESET_ALL)
-            number_of_hits += 1
-            number_of_types += 1
-            delta_hit_answ = time_hit_answ - time_request
-            type_hit_average_duration.append(delta_hit_answ)
+def utmode(max_time):
+    n_correct = 0
+    n_wrong = 0
+    time_correct = 0
+    time_wrong = 0
+    mode_start_time = time.time()
+    while time.time() < mode_start_time + int(max_time):
+        start_time = time.time()
+        n = random.choice(string.ascii_lowercase)
+        print("Type letter " + colorama.Fore.BLUE + str(n)+ colorama.Style.RESET_ALL)
+        input_char = readchar()
+        if input_char == key.SPACE:
+            break
+        if n == input_char :
+            print("You typed letter "+ colorama.Fore.GREEN + input_char+colorama.Style.RESET_ALL)
+            n_correct += 1
+            time_correct += time.time() - start_time
         else:
-            time_miss_answ = time.time()
-            print(Fore.RED + "You typed " + received + Style.RESET_ALL)
-            number_of_types +=1
-            delta_miss_answ = time_miss_answ - time_request
-            type_miss_average_duration.append(delta_miss_answ)
-        
-        time_f = time.time()
-        delta1 = time_f - time_request
-        type_average_duration.append(delta1)
-        types.append(Inputs(requested, received, delta1))
+            print("You typed letter "+ colorama.Fore.RED + input_char+colorama.Style.RESET_ALL)
+            n_wrong += 1
+            time_wrong += time.time() - start_time
 
-        time_end = time.time()
-        delta = time_end - time_init
+        input_list.append(Input(n, input_char, time.time() - start_time))
+
+    dict['inputs'] = input_list
+    if n_correct != 0 or n_wrong != 0:
+        dict['accurary'] = n_correct / (n_correct + n_wrong)
+    else:
+        dict['accurary'] = 0
+    dict['number_of_hits'] = n_correct
+    dict['number_of_types'] = n_correct + n_wrong
+    dict['test_duration'] = sum([x.duration for x in dict['inputs']])
+    dict['test_end'] = time.asctime()
+    dict['test_start'] = mode_start_time
+    if len(dict['inputs']) > 0:
+        dict['type_average_duration'] = sum([x.duration for x in dict['inputs']]) / len(dict['inputs'])
+    else:
+        dict['type_average_duration'] = 0
+    if n_correct != 0:
+        dict['type_hit_average_duration'] = time_correct / n_correct
+    else :
+        dict['type_hit_average_duration'] = 0
+    if n_wrong != 0:
+        dict['type_miss_average_duration'] = time_wrong / n_wrong
+    else:        
+        dict['type_miss_average_duration'] = 0
+
+def helpmsg():
+    msg="""
+    usage: main.py [-h] [-utm] [-mv MAX_VALUE]
+
+Definition of test mode
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+  -utm, --use_time_mode
+                        Max number of secs for time mode or maximum number of inputs for number of inputs mode.
+
+  -mv MAX_VALUE, --max_value MAX_VALUE
+                        Max number of seconds for time mode or maximum number of inputs for number of inputs mode."""
+    print(msg)
             
-        if received == " ":
-            break
-
-    dictionary(types, delta, type_average_duration, number_of_hits, number_of_types, type_hit_average_duration, type_miss_average_duration)
-    return
-
-# Point 5.2: Maximum Input Mode
-def maxInput(m):
-    types = []
-    type_average_duration = []
-    type_hit_average_duration = []
-    type_miss_average_duration = []
-
-    number_of_types = 0
-    number_of_hits = 0
-
-    time_init = time.time()
-    delta = 0
-
-    for n in range(0, m):
-        time_request = time.time()
-        requested = askLetter()
-        received = answLetter()
-        
-
-        if requested == received:
-            time_hit_answ = time.time()
-            print("You typed " + Fore.GREEN + received + Style.RESET_ALL)
-            number_of_hits += 1
-            number_of_types += 1
-            delta_hit_answ = time_hit_answ - time_request
-            type_hit_average_duration.append(delta_hit_answ)
-        else:
-            time_miss_answ = time.time()
-            print("You typed " + Fore.RED + received + Style.RESET_ALL)
-            number_of_types +=1
-            delta_miss_answ = time_miss_answ - time_request
-            type_miss_average_duration.append(delta_miss_answ)
-
-        time_f = time.time()
-        delta1 = time_f - time_request
-        type_average_duration.append(delta1)
-        types.append(Inputs(requested, received, delta1))
-
-        time_end = time.time()
-        delta = time_end - time_init
-
-        if received == " ":
-            break
-        
-    dictionary(types, delta, type_average_duration, number_of_hits, number_of_types, type_hit_average_duration, type_miss_average_duration)
-    return
-  
-def dictionary(types, delta, type_average_duration, number_of_hits, number_of_types, type_hit_average_duration, type_miss_average_duration):
 
 
-    seconds = time.time()
-    end_time = time.ctime(seconds)
-    accuracy = number_of_hits/number_of_types
-    
-    if sum(type_hit_average_duration) == 0:
-        typehit_average_duration = 0
-    else:
-        typehit_average_duration = sum(type_hit_average_duration)/len(type_hit_average_duration)
-    
-    if sum(type_miss_average_duration) == 0:
-        typemiss_average_duration = 0
-    else:
-        typemiss_average_duration = sum(type_average_duration)/len(type_miss_average_duration)
-
-    if sum(type_average_duration) == 0:
-        type_averageduration = 0
-    else:
-        type_averageduration = sum(type_average_duration)/len(type_average_duration)    
-
-    my_dict['test_end'] = end_time
-    my_dict['test_duration'] = delta
-    my_dict['inputs'] = types
-    my_dict['number_of_types'] = number_of_types
-    my_dict['number_of_hits'] = number_of_hits
-    my_dict['accuracy'] = accuracy
-    my_dict['type_average_duration'] = type_averageduration
-    my_dict['type_hit_average_duration'] = typehit_average_duration
-    my_dict['type_miss_average_duration']= typemiss_average_duration
-    
-    print(my_dict)
-
-    return
-
-def main():
-    
-    input_values = initValues()
-    startGame()
-    
-    mode = modeSelection()
-    if mode == "use_time":
-        gameTime(input_values["use_time"])
-    else:
-        maxInput(input_values["maximum_input"])
 
 if __name__ == "__main__":
     main()
