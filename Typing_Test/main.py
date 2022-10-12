@@ -30,13 +30,13 @@ def initValues():
         print("User Time Mode: you have " + str(temp) + " seconds!")
         return{"use_time" : temp}
     else:
-        print("Maximum Input Mode: you have " + str(maxv) + " chances")
+        print(Fore.BLUE + "Maximum Input Mode: you have " + str(maxv) + " chances" + Style.RESET_ALL)
         return{"maximum_input" : maxv}
 
 
 # Point 3: ask to press a letter to start
 def startGame():
-    print("Press any key to start the game:")
+    print(Fore.YELLOW + "Press any key to start the game:" + Style.RESET_ALL)
     initialize = readkey()
     if initialize != None:
         return True
@@ -142,7 +142,7 @@ def maxInput(m):
         time_f = time.time()
         delta1 = time_f - time_request
         type_average_duration.append(delta1)
-        types.append(requested, received, delta1)
+        types.append(Inputs(requested, received, delta1))
 
         time_end = time.time()
         delta = time_end - time_init
