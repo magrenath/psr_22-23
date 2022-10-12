@@ -20,7 +20,6 @@ def initValues():
     parser.add_argument('-mv', '--max_value', type=int,
                     help="Max number of secs for time mode or maximum number of inputs for number of inputs mode.")
 
-    # creates dictionary
     args = vars(parser.parse_args())
     # assings a variable to the corresponding input values
     maxv = args["max_value"]
