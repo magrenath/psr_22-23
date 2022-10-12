@@ -6,6 +6,7 @@ import argparse  # import argparse library
 def soma(p1,p2, verbose=False):
     total = p1 + p2
     if verbose:
+        
         print('Eu calculei o total cá dentro !!! ')
     return  total
 
