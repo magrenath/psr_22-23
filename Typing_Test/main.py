@@ -80,14 +80,14 @@ def gameTime(t):
 
         if requested == received:
             time_hit_answ = time.time()
-            print("You typed " + Fore.GREEN + received + Style.RESET_ALL)
+            print(Fore.GREEN + "You typed " + received + Style.RESET_ALL)
             number_of_hits += 1
             number_of_types += 1
             delta_hit_answ = time_hit_answ - time_request
             type_hit_average_duration.append(delta_hit_answ)
         else:
             time_miss_answ = time.time()
-            print("You typed " + Fore.RED + received + Style.RESET_ALL)
+            print(Fore.RED + "You typed " + received + Style.RESET_ALL)
             number_of_types +=1
             delta_miss_answ = time_miss_answ - time_request
             type_miss_average_duration.append(delta_miss_answ)
