@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 from colorama import Fore, Back, Style
 from readchar import readkey
