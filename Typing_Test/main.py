@@ -13,19 +13,9 @@ from readchar import readchar, key
 Input = namedtuple('Input', ['requested', 'received', 'duration'])
 input_list = []
 
-dict = {
-    'accuracy': 0,
-    'inputs': [],
-    'number_of_hits': 0,
-    'number_of_types': 0,
-    'test_duration': 0,
-    'test_end': '',
-    'test_start': '',
-    'type_average_duration': 0,
-    'type_hit_average_duration': 0,
-    'type_miss_average_duration': 0
-}
 
+dict = {}
+    
 def main(): 
     if sys.argv[1] == "-mv":
         mvmode(sys.argv[2])
@@ -116,7 +106,7 @@ def utmode(max_time):
         input_list.append(Input(n, input_char, time.time() - start_time))
 
     dict['inputs'] = input_list
-    if n_correct != 0 or n_wrong != 0:
+    if n_correct != 0:
         dict['accurary'] = n_correct / (n_correct + n_wrong)
     else:
         dict['accurary'] = 0
